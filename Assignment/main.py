@@ -1,5 +1,6 @@
 
 #Linked list
+#Creating a Rental Node
 class RentalNode:
     def __init__(self, car_id, customer_id, customer_name ,return_date):
         self.car_id = car_id
@@ -8,12 +9,12 @@ class RentalNode:
         self.customer_name = customer_name
         self.next = None
 
-
+#This is  Rental List
 class RentalList:
     def __init__(self):
         self.head = None
 
-
+     #This method adds a rental record
     def add_rental(self, car_id, customer_id):
         new_node = RentalNode(car_id, customer_id)
 
@@ -25,7 +26,7 @@ class RentalList:
             temp = temp.next
             temp.next = new_node
 
-
+    #This method removes a rental record
     def remove_rental(self, car_id):
         temp = self.head
         prev = None
@@ -40,7 +41,7 @@ class RentalList:
             prev = temp
             temp = temp.next
 
-
+    
     def display(self):
         temp = self.head
         while temp:
@@ -48,12 +49,13 @@ class RentalList:
             temp = temp.next
 
 #Binary tree
+#It stores the cars...using binary tree
 class CarNode:
     def __init__(self, car_id):
         self.car_id = car_id
         self.left = None
         self.right = None
-
+#Inserting a car
 def insert(root, car_id):
     if root is None:
         return CarNode(car_id)
