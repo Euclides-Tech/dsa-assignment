@@ -1,4 +1,3 @@
-
 #Linked list
 #Creating a Rental Node
 class RentalNode:
@@ -44,6 +43,7 @@ class RentalList:
                 return
             prev = temp
             temp = temp.next
+    
     def is_rented(self,car_id):
         temp = self.head
         while temp:
@@ -74,6 +74,7 @@ class CarNode:
         self.car_brand = car_brand
         self.left = None
         self.right = None
+
 #Inserting a car
 def insert(root, car_id, car_brand):
     if root is None:
@@ -118,16 +119,19 @@ def search(root, car_id):
     else:
         return search(root.right, car_id)
 
+# ============================================
+# STUDENT 2: Recursion & Tree Algorithms
+# ============================================
 
 def inorder(root):
     if root:
         inorder(root.left)
-        print(root.car_id)
+        print(f"Car ID: {root.car_id} | Brand: {root.car_brand}")
         inorder(root.right)
 
 def preorder(root):
     if root:
-        print(root.car_id)
+        print(f"Car ID: {root.car_id} | Brand: {root.car_brand}")
         preorder(root.left)
         preorder(root.right)
 
@@ -135,21 +139,53 @@ def postorder(root):
     if root:
         postorder(root.left)
         postorder(root.right)
-        print(root.car_id)   
+        print(f"Car ID: {root.car_id} | Brand: {root.car_brand}")
 
+def count_cars(root):
+    if root is None:
+        return 0
+    return 1 + count_cars(root.left) + count_cars(root.right)
+
+def count_cars_by_brand(root, brand):
+    if root is None:
+        return 0
+    count = 1 if root.car_brand == brand else 0
+    return count + count_cars_by_brand(root.left, brand) + count_cars_by_brand(root.right, brand)
+
+def get_height(root):
+    if root is None:
+        return -1
+    return 1 + max(get_height(root.left), get_height(root.right))
 
 #.....Testing.....
 #It's only a test(Cars avaiable)
 car_root = None
 car_root = insert(car_root, 102, "Toyota")
 car_root = insert(car_root, 103, "BMW")
+car_root = insert(car_root, 105, "Honda")
+car_root = insert(car_root, 80, "Ford")
+car_root = insert(car_root, 200, "Mercedes")
 
 #Customer renting the car
 rentals = RentalList()
 
-
-rentals.add_rental(102, 1, "Phiri" , "2026-04-05" )
-#....It CHECKS IF THE CAR IS ALREADY RENTED......
-rentals.add_rental(102, 2, "Andre" , "2026-04-05" )
-#Displays the rental
+rentals.add_rental(102, 1, "Phiri" , "2026-04-05")
+rentals.add_rental(102, 2, "Andre" , "2026-04-05")
 rentals.display(car_root)
+
+#print("\n" + "="*50)
+#print("STUDENT 2: RECURSIVE ALGORITHMS DEMONSTRATION")
+#print("="*50)
+
+print("\nInorder traversal (sorted by Car ID):")
+inorder(car_root)
+
+print("\nPreorder traversal:")
+preorder(car_root)
+
+print("\nPostorder traversal:")
+postorder(car_root)
+
+print("\nTotal cars in inventory:", count_cars(car_root))
+print("Cars with brand 'Toyota':", count_cars_by_brand(car_root, "Toyota"))
+print("Tree height:", get_height(car_root))
