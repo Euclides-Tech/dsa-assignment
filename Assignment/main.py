@@ -189,3 +189,90 @@ postorder(car_root)
 print("\nTotal cars in inventory:", count_cars(car_root))
 print("Cars with brand 'Toyota':", count_cars_by_brand(car_root, "Toyota"))
 print("Tree height:", get_height(car_root))
+
+#==========================================
+# Student 3: Sorting and searching algorithms
+#==========================================
+
+# Sorting algorithms
+def merge_sort_cars(car_list):
+    if len(car_list) <= 1:
+        return car_list
+        mid = len(car_list) // 2
+        left = merge_sort_cars(car_list[:mid])
+        right = merge_sort_cars(car_list[:mid])
+        return merge(left, right)
+
+def merge(left, right):
+    result = []
+    while i < len(left) and j < len(right):
+        if left[i][0] <= right[j][0]: # sortin by car_id
+            result.append(left[i])
+            i +=1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+# CONVERT TREE TO LIST 
+def tree_to_list(root, car_list):
+    if root:
+        tree_to_list(root.left, car_list)
+        car_list.append((root.car_id, root.car_brand))
+        tree_to_list(root.right, car_list)
+
+# HASH TABLE IMPLEMENTATION 
+class HashTable:
+    def __init__(self, size=10):
+        self.size = size
+        self.table = [[] for _ in range(size)]  # list of lists
+
+    def hash_function(self, key):
+        return key % self.size
+
+    def insert(self, car_id, car_brand):
+        index = self.hash_function(car_id)
+        self.table[index].append((car_id, car_brand))
+
+    def search(self, car_id):
+        index = self.hash_function(car_id)
+        for car in self.table[index]:
+            if car[0] == car_id:
+                return car
+        return None
+
+#TESTING STUDENT 3
+
+print("\n" + "="*50)
+
+# Convert BST 
+car_list = []
+tree_to_list(car_root, car_list)
+
+print("\nOriginal Car List:")
+print(car_list)
+
+# Sorting 
+sorted_cars = merge_sort_cars(car_list)
+print("\nSorted Cars (by Car ID):")
+for car in sorted_cars:
+    print(f"Car ID: {car[0]} | Brand: {car[1]}")
+
+# Hash Table Creation and Search
+
+hash_table = HashTable(size=10)
+for car in car_list:
+    hash_table.insert(car[0], car[1])
+
+search_id = 103
+result_hash = hash_table.search(search_id)
+
+# Display Search Result 
+if result_hash:
+    print(f"\nHash Table Search Found: ID={result_hash[0]}, Brand={result_hash[1]}")
+else:
+    print("Hash Table Search: Car not found")
+
+
