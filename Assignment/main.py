@@ -198,13 +198,17 @@ print("Tree height:", get_height(car_root))
 def merge_sort_cars(car_list):
     if len(car_list) <= 1:
         return car_list
-        mid = len(car_list) // 2
-        left = merge_sort_cars(car_list[:mid])
-        right = merge_sort_cars(car_list[:mid])
-        return merge(left, right)
+
+    mid = len(car_list) // 2
+    left = merge_sort_cars(car_list[:mid])
+    right = merge_sort_cars(car_list[mid:])
+
+    return merge(left, right) 
 
 def merge(left, right):
     result = []
+    i = 0
+    j = 0
     while i < len(left) and j < len(right):
         if left[i][0] <= right[j][0]: # sortin by car_id
             result.append(left[i])
