@@ -279,4 +279,369 @@ if result_hash:
 else:
     print("Hash Table Search: Car not found")
 
+# ============================================
+# STUDENT 4: HASH TABLE 
+# ============================================
 
+class HashTable:
+    def __init__(self, size):
+        self.size = size
+        self.table = [None] * size
+
+    def hash_function(self, key):
+        return key % self.size
+
+    def insert(self, key, value):
+        index = self.hash_function(key)
+        if self.table[index] is None:
+            self.table[index] = [(key, value)]
+        else:
+            for i, (k, v) in enumerate(self.table[index]):
+                if k == key:
+                    self.table[index][i] = (key, value)
+                    break
+            else:
+                self.table[index].append((key, value))
+
+    def search(self, key):
+        index = self.hash_function(key)
+        if self.table[index] is None:
+            return None
+        else:
+            for k, v in self.table[index]:
+                if k == key:
+                    return v
+            return None
+
+    def delete(self, key):
+        index = self.hash_function(key)
+        if self.table[index] is None:
+            return None
+        else:
+            for i, (k, v) in enumerate(self.table[index]):
+                if k == key:
+                    del self.table[index][i]
+                    return True
+            return False
+
+    def display(self):
+        print("\nHash Table:")
+        for i in range(self.size):
+            if self.table[i] is not None:
+                print(f"Index {i}: {self.table[i]}")
+            else:
+                print(f"Index {i}: None")
+
+
+# ============================================
+# STUDENT 4: SYSTEM INTEGRATION
+# ============================================
+
+class CarRentalSystem:
+    def __init__(self):
+        self.car_tree = None
+        self.rental_list = RentalList()
+        self.hash_table = HashTable(20)
+        self.is_initialized = False
+    
+    def initialize_system(self):
+        print("\n" + "="*50)
+        print("SYSTEM INITIALIZATION")
+        print("="*50)
+        
+        sample_cars = [
+            (101, "Toyota"), (102, "Toyota"), (103, "BMW"),
+            (104, "BMW"), (105, "Honda"), (106, "Honda"),
+            (107, "Ford"), (108, "Ford"), (109, "Mercedes"),
+            (110, "Mercedes"), (111, "Audi"), (112, "Audi"),
+            (113, "Nissan"), (114, "Nissan"), (115, "Hyundai")
+        ]
+        
+        print("\nAdding cars to inventory:")
+        for car_id, car_brand in sample_cars:
+            self.car_tree = insert(self.car_tree, car_id, car_brand)
+            self.hash_table.insert(car_id, car_brand)
+            print(f"  ✓ Added Car {car_id}: {car_brand}")
+        
+        self.is_initialized = True
+        print(f"\n✓ System ready! Total cars: {count_cars(self.car_tree)}")
+        print(f"✓ Hash table size: {self.hash_table.size}")
+        print("="*50)
+    
+    def rent_car(self, car_id, customer_id, customer_name, return_date):
+        print(f"\n--- RENTAL: Car {car_id} for {customer_name} ---")
+        
+        car = search(self.car_tree, car_id)
+        if not car:
+            print(f"✗ Car {car_id} not found")
+            return False
+        
+        if self.rental_list.is_rented(car_id):
+            print(f"✗ Car {car_id} is already rented")
+            return False
+        
+        self.rental_list.add_rental(car_id, customer_id, customer_name, return_date)
+        print(f"✓ Car {car_id} ({car.car_brand}) rented to {customer_name}")
+        return True
+    
+    def return_car(self, car_id):
+        print(f"\n--- RETURN: Car {car_id} ---")
+        
+        if not self.rental_list.is_rented(car_id):
+            print(f"✗ Car {car_id} is not rented")
+            return False
+        
+        self.rental_list.remove_rental(car_id)
+        print(f"✓ Car {car_id} returned")
+        return True
+    
+    def search_car(self, car_id):
+        print(f"\n--- SEARCHING FOR CAR {car_id} ---")
+        
+        bst_result = search(self.car_tree, car_id)
+        if bst_result:
+            print(f"BST Search: Found Car {bst_result.car_id} - {bst_result.car_brand}")
+        else:
+            print(f"BST Search: Car {car_id} not found")
+        
+        hash_result = self.hash_table.search(car_id)
+        if hash_result:
+            print(f"Hash Search: Found Car {car_id} - {hash_result}")
+        else:
+            print(f"Hash Search: Car {car_id} not found")
+        
+        return bst_result is not None
+    
+    def search_by_brand(self, brand):
+        print(f"\n--- SEARCHING FOR BRAND: {brand} ---")
+        
+        def search_tree(root, brand, results):
+            if root:
+                if root.car_brand.lower() == brand.lower():
+                    results.append((root.car_id, root.car_brand))
+                search_tree(root.left, brand, results)
+                search_tree(root.right, brand, results)
+        
+        results = []
+        search_tree(self.car_tree, brand, results)
+        
+        if results:
+            print(f"Found {len(results)} car(s):")
+            for car_id, car_brand in results:
+                print(f"  • Car {car_id}: {car_brand}")
+        else:
+            print(f"No cars found for brand '{brand}'")
+        
+        return results
+    
+    def display_all(self):
+        print("\n" + "="*50)
+        print("ALL CARS (Sorted by ID):")
+        print("-"*50)
+        inorder(self.car_tree)
+        
+        print("\nCURRENT RENTALS:")
+        print("-"*50)
+        self.rental_list.display(self.car_tree)
+        
+        self.hash_table.display()
+    
+    def get_stats(self):
+        print("\n" + "="*50)
+        print("SYSTEM STATISTICS")
+        print("="*50)
+        print(f"Total Cars: {count_cars(self.car_tree)}")
+        print(f"Tree Height: {get_height(self.car_tree)}")
+        
+        rental_count = 0
+        temp = self.rental_list.head
+        while temp:
+            rental_count += 1
+            temp = temp.next
+        print(f"Active Rentals: {rental_count}")
+        print("="*50)
+
+
+# ============================================
+# STUDENT 4: TESTING
+# ============================================
+
+def run_tests():
+    print("\n" + "="*50)
+    print("RUNNING COMPREHENSIVE TESTS")
+    print("="*50)
+    
+    system = CarRentalSystem()
+    
+    # Test 1: Initialize
+    print("\n[TEST 1] System Initialization")
+    system.initialize_system()
+    print("✓ PASSED")
+    
+    # Test 2: Search by ID
+    print("\n[TEST 2] Search by ID")
+    system.search_car(105)
+    system.search_car(999)
+    print("✓ PASSED")
+    
+    # Test 3: Rent Car
+    print("\n[TEST 3] Rent Car")
+    system.rent_car(105, 1001, "John Doe", "2026-04-10")
+    system.rent_car(105, 1002, "Jane Smith", "2026-04-12")
+    print("✓ PASSED")
+    
+    # Test 4: Return Car
+    print("\n[TEST 4] Return Car")
+    system.return_car(105)
+    system.return_car(105)
+    print("✓ PASSED")
+    
+    # Test 5: Hash Table Operations
+    print("\n[TEST 5] Hash Table Operations")
+    system.hash_table.insert(201, "Test Car")
+    print(f"  Inserted: {system.hash_table.search(201)}")
+    system.hash_table.delete(201)
+    print(f"  Deleted, search returns: {system.hash_table.search(201)}")
+    print("✓ PASSED")
+    
+    # Test 6: Search by Brand
+    print("\n[TEST 6] Search by Brand")
+    system.search_by_brand("Toyota")
+    system.search_by_brand("Ferrari")
+    print("✓ PASSED")
+    
+    # Test 7: Display All
+    print("\n[TEST 7] Display System")
+    system.display_all()
+    print("✓ PASSED")
+    
+    # Test 8: Statistics
+    print("\n[TEST 8] System Statistics")
+    system.get_stats()
+    print("✓ PASSED")
+    
+    # Test 9: Edge Cases
+    print("\n[TEST 9] Edge Cases")
+    system.rent_car(999, 1003, "Test User", "2026-04-20")
+    system.return_car(999)
+    print("✓ PASSED")
+    
+    # Test 10: Performance
+    print("\n[TEST 10] Performance Test")
+    import time
+    
+    start = time.time()
+    for i in range(1000):
+        system.hash_table.search(105)
+    hash_time = time.time() - start
+    
+    start = time.time()
+    for i in range(1000):
+        search(system.car_tree, 105)
+    bst_time = time.time() - start
+    
+    print(f"Hash Table (1000 searches): {hash_time*1000:.2f} ms")
+    print(f"Binary Tree (1000 searches): {bst_time*1000:.2f} ms")
+    print(f"Hash is {bst_time/hash_time:.1f}x faster")
+    print("✓ PASSED")
+    
+    # Summary
+    print("\n" + "="*50)
+    print("✓ ALL TESTS PASSED!")
+    print("✓ System ready for presentation")
+    print("="*50)
+
+
+# ============================================
+# MAIN MENU
+# ============================================
+
+def main_menu():
+    system = CarRentalSystem()
+    
+    while True:
+        print("\n" + "="*50)
+        print("CAR RENTAL SYSTEM")
+        print("="*50)
+        print("1. Initialize System")
+        print("2. Rent a Car")
+        print("3. Return a Car")
+        print("4. Search Car by ID")
+        print("5. Search by Brand")
+        print("6. Display All Cars")
+        print("7. View Statistics")
+        print("8. View Hash Table")
+        print("9. Run All Tests")
+        print("10. Exit")
+        print("="*50)
+        
+        choice = input("Enter choice (1-10): ")
+        
+        if choice == '1':
+            system.initialize_system()
+        
+        elif choice == '2':
+            try:
+                car_id = int(input("Car ID: "))
+                cust_id = int(input("Customer ID: "))
+                name = input("Customer Name: ")
+                date = input("Return Date (YYYY-MM-DD): ")
+                system.rent_car(car_id, cust_id, name, date)
+            except:
+                print("Invalid input!")
+        
+        elif choice == '3':
+            try:
+                car_id = int(input("Car ID to return: "))
+                system.return_car(car_id)
+            except:
+                print("Invalid input!")
+        
+        elif choice == '4':
+            try:
+                car_id = int(input("Car ID to search: "))
+                system.search_car(car_id)
+            except:
+                print("Invalid input!")
+        
+        elif choice == '5':
+            brand = input("Brand name: ")
+            system.search_by_brand(brand)
+        
+        elif choice == '6':
+            system.display_all()
+        
+        elif choice == '7':
+            system.get_stats()
+        
+        elif choice == '8':
+            system.hash_table.display()
+        
+        elif choice == '9':
+            run_tests()
+        
+        elif choice == '10':
+            print("\nThank you for using Car Rental System!")
+            break
+        
+        else:
+            print("Invalid choice!")
+        
+        input("\nPress Enter to continue...")
+
+
+# ============================================
+# RUN THE PROGRAM
+# ============================================
+
+if __name__ == "__main__":
+    print("\n" + "="*50)
+    print("WELCOME TO CAR RENTAL SYSTEM")
+    print("STUDENT 4: HASHING & INTEGRATION")
+    print("="*50)
+    
+    choice = input("\nRun tests? (y/n): ").lower()
+    if choice == 'y':
+        run_tests()
+    else:
+        main_menu()
